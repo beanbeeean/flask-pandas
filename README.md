@@ -36,6 +36,7 @@
    pip install -r requirements.txt
    ```
 4. **데이터베이스 초기화**
+   데이터베이스 초기화와 관련된 스크립트를 실행합니다. (예: flask db init 등)
 
 ## 사용법
 1. 서버 실행
