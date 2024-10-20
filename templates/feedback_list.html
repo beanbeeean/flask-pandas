@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/styles.css') }}"
+    />
+    <title>피드백 목록</title>
+  </head>
+  <body>
+    <h1>피드백 목록</h1>
+    <table>
+      <tr>
+        <th>ID</th>
+        <th>이름</th>
+        <th>이메일</th>
+        <th>서비스</th>
+        <th>피드백 유형</th>
+        <th>피드백 내용</th>
+        <th>제출 날짜</th>
+      </tr>
+      {% for feedback in feedbacks %}
+      <tr>
+        <td>{{ feedback.id }}</td>
+        <td>{{ feedback.name }}</td>
+        <td>{{ feedback.email }}</td>
+        <td>{{ feedback.service.name }}</td>
+        <td>{{ feedback.feedback_type }}</td>
+        <td>{{ feedback.feedback_content }}</td>
+        <td>{{ feedback.created_at }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+    <a href="/statistics">통계 보기</a>
+  </body>
+</html>

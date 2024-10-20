@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>피드백 제출</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/styles.css') }}"
+    />
+  </head>
+  <body>
+    <h1>피드백 제출</h1>
+    <form action="/submit" method="POST">
+      <label for="name">이름:</label>
+      <input type="text" id="name" name="name" /><br />
+
+      <label for="email">이메일:</label>
+      <input type="email" id="email" name="email" /><br />
+
+      <label for="service_id">서비스 선택:</label>
+      <select id="service_id" name="service_id" required>
+        {% for service in services %}
+        <option value="{{ service.id }}">{{ service.name }}</option>
+        {% endfor %}</select
+      ><br />
+
+      <label for="feedback_type">피드백 유형:</label>
+      <select id="feedback_type" name="feedback_type" required>
+        <option value="긍정적">긍정적</option>
+        <option value="부정적">부정적</option></select
+      ><br />
+
+      <label for="feedback_content">피드백 내용:</label>
+      <textarea
+        id="feedback_content"
+        name="feedback_content"
+        required
+      ></textarea
+      ><br />
+
+      <button type="submit">제출</button>
+    </form>
+  </body>
+</html>
