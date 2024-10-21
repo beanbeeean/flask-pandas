@@ -1,25 +1,50 @@
 import unittest
-from app import app
+from app import app, db, Feedback, Service
 
-class BasicTests(unittest.TestCase):
+class FlaskAppTests(unittest.TestCase):
 
     def setUp(self):
+        # 테스트용 애플리케이션과 데이터베이스 설정
         self.app = app.test_client()
         self.app.testing = True
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+        db.create_all()
 
-    def test_home(self):
-        response = self.app.get('/')
-        self.assertEqual(response.status_code, 200)
+        # 테스트 데이터 추가
+        self.service = Service(name='Test Service')
+        db.session.add(self.service)
+        db.session.commit()
 
-    def test_feedback_submission(self):
-        response = self.app.post('/submit', data={
-            'name': 'Alice',
-            'email': 'alice@example.com',
-            'service_id': 1,
+    def tearDown(self):
+        # 데이터베이스 세션 종료
+        db.session.remove()
+        db.drop_all()
+
+    def test_submit_feedback(self):
+        # 피드백 제출 테스트
+        response = self.app.post('/submit_feedback', data={
+            'service_id': self.service.id,
             'feedback_type': '긍정적',
-            'feedback_content': 'Great service!'
+            'content': 'Great service!'
         })
-        self.assertEqual(response.status_code, 302)  # Redirect after submission
+        self.assertEqual(response.status_code, 302)  # 리다이렉션 확인
+
+        # 피드백이 데이터베이스에 저장되었는지 확인
+        feedback = Feedback.query.first()
+        self.assertIsNotNone(feedback)
+        self.assertEqual(feedback.content, 'Great service!')
+
+    def test_statistics_page(self):
+        # 통계 페이지 테스트
+        response = self.app.get('/statistics')
+        self.assertEqual(response.status_code, 200)  # 페이지 로드 확인
+        self.assertIn(b'서비스별 피드백 통계', response.data)  # 페이지 내용 확인
+
+    def test_download_statistics(self):
+        # 통계 다운로드 테스트
+        response = self.app.get('/download_statistics')
+        self.assertEqual(response.status_code, 200)  # 파일 다운로드 확인
+        self.assertEqual(response.content_type, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')  # Excel 파일 형식 확인
 
 if __name__ == '__main__':
     unittest.main()
