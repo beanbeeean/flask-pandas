@@ -8,17 +8,24 @@ class FlaskAppTests(unittest.TestCase):
         self.app = app.test_client()
         self.app.testing = True
         app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
-        db.create_all()
 
-        # 테스트 데이터 추가
-        self.service = Service(name='Test Service')
-        db.session.add(self.service)
-        db.session.commit()
+        # 애플리케이션 컨텍스트 설정
+        with app.app_context():
+            db.create_all()
+
+            # 테스트 데이터 추가
+            service = Service(name='Test Service')
+            db.session.add(service)
+            db.session.commit()
+
+            # 서비스 객체를 다시 쿼리하여 세션에 바인딩
+            self.service = Service.query.first()
 
     def tearDown(self):
         # 데이터베이스 세션 종료
-        db.session.remove()
-        db.drop_all()
+        with app.app_context():
+            db.session.remove()
+            db.drop_all()
 
     def test_submit_feedback(self):
         # 피드백 제출 테스트
@@ -38,7 +45,7 @@ class FlaskAppTests(unittest.TestCase):
         # 통계 페이지 테스트
         response = self.app.get('/statistics')
         self.assertEqual(response.status_code, 200)  # 페이지 로드 확인
-        self.assertIn(b'서비스별 피드백 통계', response.data)  # 페이지 내용 확인
+        self.assertIn('서비스별 피드백 통계', response.data.decode('utf-8'))  # 페이지 내용 확인
 
     def test_download_statistics(self):
         # 통계 다운로드 테스트
